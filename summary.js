@@ -219,7 +219,7 @@ document.getElementById('download-btn').addEventListener('click', () => {
 document.getElementById('tweet-btn').addEventListener('click', async () => {
   const canvas = document.getElementById('export-canvas');
   const params = window.__climbModeSessionParams || {};
-  const tweetText = `Novisteps-ClimbMode でトレーニングしました！\n所要時間: ${params.durationMin || '?'}分\nグレード推移: ${params.initGrade || '?'} ➔ ${params.currentGrade || '?'}\n結果: ${params.totalAC || 0} AC / ${params.totalFail || 0} 解説AC\n#AtCoder #Novisteps`;
+  const tweetText = `Novisteps-ClimbMode でトレーニングしました！\n所要時間: ${params.durationMin || '?'}分\nグレード推移: ${params.initGrade || '?'} ➔ ${params.currentGrade || '?'}\n結果: ${params.totalAC || 0} AC / ${params.totalFail || 0} 解説AC\n#AtCoder #Novisteps #NovistepsClimbmode\n https://github.com/blueberry1001/Novisteps-Climbmode`;
   const twUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
 
   try {
