@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>セッション結果 - Novisteps-ClimbMode</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #F3F4F6; /* Gray 100 */
+      color: #111827; /* Gray 900 */
+      font-family: "Inter", "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 860px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 32px;
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB; /* Gray 200 */
+      border-radius: 16px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
+    }
+    h1 {
+      color: #1F2937;
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 32px;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    #text-summary {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-around;
+      background: #FFFFFF;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    .canvas-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 32px;
+      overflow-x: auto;
+    }
+    canvas {
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      border: 1px solid #E5E7EB;
+    }
+    .btn-container {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+    button {
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    #download-btn {
+      background-color: #10B981; /* Emerald 500 */
+    }
+    #download-btn:hover {
+      background-color: #059669;
+    }
+    #tweet-btn {
+      background-color: #000000; /* X Black */
+    }
+    #tweet-btn:hover {
+      background-color: #333333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎉 トレーニングセッションが完了しました</h1>
+    
+    <div id="text-summary" style="display: none;">
+      <!-- JavaScriptで描画用の非表示要素 -->
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="export-canvas"></canvas>
+    </div>
+
+    <div class="btn-container">
+      <button id="download-btn">結果画像を保存 (PNG)</button>
+      <button id="tweet-btn">結果を X(Twitter) でシェアする</button>
+    </div>
+  </div>
+
+  <script src="summary.js"></script>
+</body>
+</html>

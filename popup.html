@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Novisteps-ClimbMode</title>
+  <style>
+    body {
+      width: 320px;
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #111827;
+      background-color: #F9FAFB;
+    }
+    h1 {
+      font-size: 1.25rem;
+      margin-top: 0;
+      text-align: center;
+      color: #1F2937;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin-bottom: 24px;
+    }
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #FFFFFF;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      border: 1px solid #F3F4F6;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    button.primary {
+      background-color: #2563EB;
+      color: white;
+    }
+    button.primary:hover:not(:disabled) { background-color: #1D4ED8; }
+    
+    button.danger {
+      background-color: #EF4444;
+      color: white;
+    }
+    button.danger:hover:not(:disabled) { background-color: #DC2626; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2); }
+
+    button.secondary {
+      background-color: #F3F4F6;
+      color: #4B5563;
+      border: 1px solid #E5E7EB;
+      box-shadow: none;
+    }
+    button.secondary:hover { background-color: #E5E7EB; color: #111827; }
+
+    select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #D1D5DB;
+      width: 100%;
+      font-size: 14px;
+      outline: none;
+      background-color: #FFFFFF;
+      transition: border-color 0.2s;
+    }
+    select:focus {
+      border-color: #2563EB;
+    }
+
+    .info-box {
+      background: #F8FAFC;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 14px;
+      border: 1px solid #E2E8F0;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+
+    .problem-title {
+      font-weight: 700;
+      color: #2563EB;
+      word-break: break-all;
+      margin-top: 4px;
+      font-size: 15px;
+    }
+    .problem-title a:hover {
+      text-decoration: underline;
+    }
+
+    .note-text {
+      font-size: 12px;
+      color: #64748B;
+      text-align: center;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    #stats {
+      margin-top: 8px;
+      font-size: 13px;
+      padding-top: 16px;
+      border-top: 1px dashed #E2E8F0;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      color: #475569;
+    }
+    .badge-ac {
+      color: #059669;
+      font-weight: 700;
+    }
+    .badge-fail {
+      color: #D97706;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <h1>Novisteps-ClimbMode</h1>
+
+  <div id="start-panel" class="panel">
+    <div style="font-size: 14px; color: #374151; font-weight: 600;">初期グレードを選択</div>
+    <select id="initial-diff"></select>
+    <button id="start-btn" class="primary">セッション開始</button>
+  </div>
+
+  <div id="active-panel" class="panel hidden">
+    <div class="info-box">
+      <div style="color: #64748B;">現在のグレード: <strong id="curr-diff" style="color: #0F172A;">...</strong></div>
+      <div style="margin-top: 12px; color: #64748B;">ターゲット問題:</div>
+      <div id="curr-prob" class="problem-title">問題を検索中...</div>
+    </div>
+
+    <p class="note-text">
+      ※ Novisteps上で「AC」または「解説AC」を選択すると、自動記録して次の問題へ進みます。
+    </p>
+    
+    <button id="giveup-btn" class="danger">ギブアップ (難易度を下げる)</button>
+    
+    <button id="stop-btn" class="secondary">セッション終了</button>
+
+    <div id="stats"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+  "name": "Novisteps-ClimbMode",
+  "description": "Training system for competitive programming using AtCoder Novisteps.",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "Novisteps Climb-mode.png"
+  },
+  "icons": {
+    "16": "Novisteps Climb-mode.png",
+    "48": "Novisteps Climb-mode.png",
+    "128": "Novisteps Climb-mode.png"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://atcoder-novisteps.vercel.app/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
