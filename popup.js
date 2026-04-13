@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnStart = document.getElementById('start-btn');
   const btnStop = document.getElementById('stop-btn');
   const btnGiveUp = document.getElementById('giveup-btn');
+  const btnPause = document.getElementById('pause-btn');
   const textDiff = document.getElementById('curr-diff');
   const textProb = document.getElementById('curr-prob');
   const statsContainer = document.getElementById('stats');
@@ -44,6 +45,21 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       textProb.textContent = "次の問題を取得中...";
       btnGiveUp.disabled = true;
+    }
+
+    // Pause button visibility / label
+    if (btnPause) {
+      if (session) {
+        btnPause.classList.remove('hidden');
+        if (session.paused) {
+          btnPause.textContent = '再開';
+        } else {
+          btnPause.textContent = '一時停止';
+        }
+        btnPause.disabled = false;
+      } else {
+        btnPause.classList.add('hidden');
+      }
     }
 
     renderStats(session.solvedCount, session.failedCount);
@@ -109,6 +125,23 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   btnGiveUp.addEventListener('click', () => recordResult('GiveUp'));
+
+  // Pause / Resume
+  if (btnPause) {
+    btnPause.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: 'GET_SESSION' }, (res) => {
+        const s = res && res.session;
+        if (!s) return;
+        const cmd = s.paused ? 'RESUME_SESSION' : 'PAUSE_SESSION';
+        chrome.runtime.sendMessage({ type: cmd }, (response) => {
+          if (response && response.session) {
+            lastSessionJson = JSON.stringify(response.session);
+            updateUI(response.session);
+          }
+        });
+      });
+    });
+  }
 
   setInterval(() => {
     chrome.runtime.sendMessage({ type: 'GET_SESSION' }, (response) => {
