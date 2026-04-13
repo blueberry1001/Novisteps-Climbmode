@@ -85,12 +85,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  let lastSessionObj = null;
   chrome.runtime.sendMessage({ type: 'GET_SESSION' }, (response) => {
     if (response && response.session) {
       lastSessionJson = JSON.stringify(response.session);
+      lastSessionObj = response.session;
       updateUI(response.session);
     } else {
       lastSessionJson = '';
+      lastSessionObj = null;
       updateUI(null);
     }
   });
@@ -100,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: 'START_SESSION', difficulty: d }, (response) => {
       if (response && response.session) {
         lastSessionJson = JSON.stringify(response.session);
+        lastSessionObj = response.session;
         updateUI(response.session);
       }
     });
@@ -108,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
   btnStop.addEventListener('click', () => {
     chrome.runtime.sendMessage({ type: 'STOP_SESSION' }, () => {
       lastSessionJson = '';
+      lastSessionObj = null;
       updateUI(null);
     });
   });
@@ -119,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: 'RECORD_RESULT', action: action }, (response) => {
       if (response && response.session) {
          lastSessionJson = JSON.stringify(response.session);
+         lastSessionObj = response.session;
          updateUI(response.session);
       }
     });
@@ -136,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.runtime.sendMessage({ type: cmd }, (response) => {
           if (response && response.session) {
             lastSessionJson = JSON.stringify(response.session);
+            lastSessionObj = response.session;
             updateUI(response.session);
           }
         });
@@ -143,17 +150,71 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Update session via background every second and keep local copy for timer rendering
   setInterval(() => {
     chrome.runtime.sendMessage({ type: 'GET_SESSION' }, (response) => {
       if (response && response.session) {
         const json = JSON.stringify(response.session);
         if (json !== lastSessionJson) {
            lastSessionJson = json;
+           lastSessionObj = response.session;
            updateUI(response.session);
+        } else {
+           lastSessionObj = response.session;
         }
       } else {
         lastSessionJson = '';
+        lastSessionObj = null;
       }
     });
   }, 1000);
+
+  // Timer display update (session elapsed and current problem lap)
+  const pad = (n) => n.toString().padStart(2,'0');
+  const formatDuration = (ms) => {
+    if (!ms || ms < 0) return '0:00';
+    const s = Math.round(ms/1000);
+    const m = Math.floor(s/60);
+    const r = s % 60;
+    return `${m}:${pad(r)}`;
+  };
+
+  const updateTimers = () => {
+    const sess = lastSessionObj;
+    const elSession = document.getElementById('session-timer');
+    const elProblem = document.getElementById('problem-timer');
+    if (!elSession || !elProblem) return;
+    if (!sess || !sess.startTime) {
+      elSession.textContent = '0:00';
+      elProblem.textContent = '-';
+      return;
+    }
+    let now = Date.now();
+    // total paused ms including current pause
+    let totalPaused = (sess.totalPausedMs || 0);
+    if (sess.paused && sess.pauseStartedAt) {
+      totalPaused += (now - sess.pauseStartedAt);
+    }
+    const elapsedSession = now - sess.startTime - totalPaused;
+    elSession.textContent = formatDuration(elapsedSession);
+
+    if (sess.currentProblem && sess.currentProblemStartedAt) {
+      let problemPaused = (sess.currentProblemPausedMs || 0);
+      if (sess.paused && sess.pauseStartedAt) {
+        // attribute current pause to current problem as well
+        problemPaused += (now - sess.pauseStartedAt);
+      }
+      const elapsedProblem = now - sess.currentProblemStartedAt - problemPaused;
+      elProblem.textContent = formatDuration(elapsedProblem);
+    } else {
+      elProblem.textContent = '-';
+    }
+    // indicate paused state
+    if (sess.paused) {
+      elSession.textContent += ' (一時停止)';
+    }
+  };
+  setInterval(updateTimers, 1000);
+  // run immediately to show values
+  updateTimers();
 });
