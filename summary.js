@@ -72,6 +72,7 @@ function drawCanvas(session, durationMin, totalAC, totalFail, initGrade, current
   const ctx = canvas.getContext('2d');
   
   const width = 800;
+  const ratio = window.devicePixelRatio || 1;
   const history = session.history || [];
   const listStartY = 240;
   const rowHeight = 48;
@@ -79,8 +80,12 @@ function drawCanvas(session, durationMin, totalAC, totalFail, initGrade, current
   // If no items, keep a nice default height
   const height = Math.max(400, listStartY + (history.length * rowHeight) + 80);
   
-  canvas.width = width;
-  canvas.height = height;
+  // Support high-DPI exports by scaling the backing store while keeping CSS size
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  canvas.width = Math.floor(width * ratio);
+  canvas.height = Math.floor(height * ratio);
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 
   // Global White Background wrapper
   ctx.fillStyle = '#FFFFFF';
@@ -114,13 +119,24 @@ function drawCanvas(session, durationMin, totalAC, totalFail, initGrade, current
     ctx.fillStyle = '#6B7280'; // Gray 500
     ctx.font = 'bold 14px "Inter", sans-serif';
     
+    const formatDuration = (ms) => {
+      if (!ms && ms !== 0) return '-';
+      const s = Math.round(ms / 1000);
+      if (s < 60) return `${s}秒`;
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${m}分${r.toString().padStart(2,'0')}秒`;
+    };
+
     // Header labels
     ctx.textAlign = 'center';
-    ctx.fillText('難易度', 110, listStartY - 10);
+    ctx.fillText('難易度', 90, listStartY - 10);
     ctx.textAlign = 'left';
     ctx.fillText('問題名', 180, listStartY - 10);
     ctx.textAlign = 'center';
-    ctx.fillText('結果', width - 110, listStartY - 10);
+    ctx.fillText('所要時間', width - 220, listStartY - 10);
+    ctx.textAlign = 'center';
+    ctx.fillText('結果', width - 100, listStartY - 10);
 
     // Separator line under header
     ctx.strokeStyle = '#E5E7EB';
@@ -143,14 +159,20 @@ function drawCanvas(session, durationMin, totalAC, totalFail, initGrade, current
       ctx.fillStyle = '#111827'; // Very dark gray for grade
       ctx.font = 'bold 15px "Inter", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(record.difficultyName, 110, y + 29);
+      ctx.fillText(record.difficultyName, 90, y + 29);
 
       // Title
       ctx.textAlign = 'left';
       ctx.fillStyle = '#2563EB'; // Blue link color
       ctx.font = '15px "Inter", sans-serif';
-      const safeTitle = truncateText(ctx, record.title, width - 340);
+      const safeTitle = truncateText(ctx, record.title, width - 420);
       ctx.fillText(safeTitle, 180, y + 29);
+
+      // Duration
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#374151';
+      ctx.font = '13px "Inter", sans-serif';
+      ctx.fillText(formatDuration(record.durationMs), width - 220, y + 29);
 
       // Status Badge
       ctx.textAlign = 'center';

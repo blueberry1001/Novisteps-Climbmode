@@ -38,7 +38,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       usedProblems: [],
       history: [],
       solvedCount: {},
-      failedCount: {}
+      failedCount: {},
+      // pause/resume support
+      paused: false,
+      pauseStartedAt: null,
+      totalPausedMs: 0,
+      // per-problem timing
+      currentProblemStartedAt: null,
+      currentProblemPausedMs: 0
     };
     saveSession().then(() => {
       requestNextProblem();
@@ -46,6 +53,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true; // async
   } else if (message.type === 'GET_SESSION') {
+    sendResponse({ session });
+  } else if (message.type === 'PAUSE_SESSION') {
+    if (session && !session.paused) {
+      session.paused = true;
+      session.pauseStartedAt = Date.now();
+      // mark pause for current problem timing
+      saveSession().then(() => sendResponse({ session }));
+      return true;
+    }
+    sendResponse({ session });
+  } else if (message.type === 'RESUME_SESSION') {
+    if (session && session.paused) {
+      const pausedDuration = Date.now() - (session.pauseStartedAt || Date.now());
+      session.totalPausedMs = (session.totalPausedMs || 0) + pausedDuration;
+      // attribute to current problem paused time if applicable
+      session.currentProblemPausedMs = (session.currentProblemPausedMs || 0) + pausedDuration;
+      session.paused = false;
+      session.pauseStartedAt = null;
+      saveSession().then(() => sendResponse({ session }));
+      return true;
+    }
     sendResponse({ session });
   } else if (message.type === 'STOP_SESSION') {
     if (session) {
@@ -71,15 +99,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { action } = message;
     const d = session.currentDifficulty;
 
+    // compute per-problem elapsed time (account for pauses)
+    let durationMs = null;
+    if (session.currentProblemStartedAt) {
+      durationMs = Date.now() - session.currentProblemStartedAt - (session.currentProblemPausedMs || 0);
+    }
+
     if (session.currentProblem) {
       if (!session.history) session.history = [];
-      session.history.push({
+      const entry = {
         title: session.currentProblem.title,
         difficultyName: session.currentProblem.difficulty,
         status: action === 'AC' ? "AC" : "解説AC",
         url: session.currentProblem.url
-      });
+      };
+      if (durationMs !== null) entry.durationMs = durationMs;
+      session.history.push(entry);
     }
+
+    // clear per-problem timing
+    session.currentProblemStartedAt = null;
+    session.currentProblemPausedMs = 0;
 
     if (action === 'AC') {
       session.solvedCount[d] = (session.solvedCount[d] || 0) + 1;
@@ -104,6 +144,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!session) return;
     const { problem } = message;
     session.currentProblem = problem;
+    // set per-problem start timestamp for lap timing
+    session.currentProblemStartedAt = Date.now();
+    session.currentProblemPausedMs = 0;
     if (!session.usedProblems.includes(problem.url)) {
       session.usedProblems.push(problem.url);
     }
