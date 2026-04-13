@@ -39,6 +39,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       history: [],
       solvedCount: {},
       failedCount: {},
+      giveupCount: {},
       // pause/resume support
       paused: false,
       pauseStartedAt: null,
@@ -110,7 +111,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const entry = {
         title: session.currentProblem.title,
         difficultyName: session.currentProblem.difficulty,
-        status: action === 'AC' ? "AC" : "解説AC",
+        status: (action === 'AC') ? 'AC' : (action === 'ExplainAC') ? '解説AC' : (action === 'GiveUp') ? 'ギブアップ' : action,
         url: session.currentProblem.url
       };
       if (durationMs !== null) entry.durationMs = durationMs;
@@ -124,8 +125,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (action === 'AC') {
       session.solvedCount[d] = (session.solvedCount[d] || 0) + 1;
       session.currentDifficulty++;
+    } else if (action === 'ExplainAC') {
+      // 解説AC
+      session.failedCount[d] = (session.failedCount[d] || 0) + 1;
+      session.currentDifficulty--;
+    } else if (action === 'GiveUp') {
+      session.giveupCount[d] = (session.giveupCount[d] || 0) + 1;
+      session.currentDifficulty--;
     } else {
-      // failed or gave up
+      // default fallback: treat as failed
       session.failedCount[d] = (session.failedCount[d] || 0) + 1;
       session.currentDifficulty--;
     }

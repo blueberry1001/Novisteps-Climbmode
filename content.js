@@ -246,7 +246,8 @@ function checkStatusUpdate() {
             currentProblemStatus = newStatus;
             currentProblemUrl = null;
             updateCSS(); // unhide before switching
-            chrome.runtime.sendMessage({ type: 'RECORD_RESULT', action: 'GiveUp' });
+            // Distinguish 解説AC (ExplainAC) from user-initiated ギブアップ
+            chrome.runtime.sendMessage({ type: 'RECORD_RESULT', action: 'ExplainAC' });
         }
     }
 }

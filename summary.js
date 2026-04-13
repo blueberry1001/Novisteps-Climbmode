@@ -61,13 +61,15 @@ function renderSummary(session) {
   
   let totalAC = 0;
   let totalFail = 0;
+  let totalGiveUp = 0;
   Object.values(session.solvedCount || {}).forEach(v => totalAC += v);
   Object.values(session.failedCount || {}).forEach(v => totalFail += v);
+  Object.values(session.giveupCount || {}).forEach(v => totalGiveUp += v);
 
-  drawCanvas(session, durationMin, totalAC, totalFail, initGrade, currentGrade);
+  drawCanvas(session, durationMin, totalAC, totalFail, totalGiveUp, initGrade, currentGrade);
 }
 
-function drawCanvas(session, durationMin, totalAC, totalFail, initGrade, currentGrade) {
+function drawCanvas(session, durationMin, totalAC, totalFail, totalGiveUp, initGrade, currentGrade) {
   const canvas = document.getElementById('export-canvas');
   const ctx = canvas.getContext('2d');
   
@@ -112,7 +114,7 @@ function drawCanvas(session, durationMin, totalAC, totalFail, initGrade, current
   drawMetricCard(ctx, startX + cardW + gap, 100, cardW, cardH, 'グレード推移', `${initGrade} ➔ ${currentGrade}`, '#2563EB');
   // AtCoder specific AC/WA colors (Green and Orange)
   drawMetricCard(ctx, startX + (cardW + gap) * 2, 100, cardW, cardH, '総AC数', `${totalAC}`, '#059669'); // Emerald 600
-  drawMetricCard(ctx, startX + (cardW + gap) * 3, 100, cardW, cardH, '総解説AC数', `${totalFail}`, '#D97706'); // Amber 600
+  drawMetricCard(ctx, startX + (cardW + gap) * 3, 100, cardW, cardH, '総解説AC / ギブアップ', `${totalFail} / ${totalGiveUp}`, '#D97706'); // Amber 600
 
   // History List Header
   if (history.length > 0) {
@@ -184,6 +186,13 @@ function drawCanvas(session, durationMin, totalAC, totalFail, initGrade, current
         ctx.fill();
         ctx.fillStyle = '#059669'; // Emerald 600 text
         ctx.fillText('AC', width - 110, y + 30);
+      } else if (record.status === 'ギブアップ') {
+        ctx.fillStyle = '#FEE2E2'; // Red-100 background
+        ctx.beginPath();
+        ctx.roundRect(width - 160, y + 10, 96, 28, 6);
+        ctx.fill();
+        ctx.fillStyle = '#EF4444'; // Red-500 text
+        ctx.fillText('ギブアップ', width - 110, y + 30);
       } else {
         ctx.fillStyle = '#FEF3C7'; // Amber 100 background
         ctx.beginPath();
@@ -226,7 +235,8 @@ function drawCanvas(session, durationMin, totalAC, totalFail, initGrade, current
     initGrade,
     currentGrade,
     totalAC,
-    totalFail
+    totalFail,
+    totalGiveUp
   };
 }
 

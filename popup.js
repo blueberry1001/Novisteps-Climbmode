@@ -62,12 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    renderStats(session.solvedCount, session.failedCount);
+    renderStats(session.solvedCount, session.failedCount, session.giveupCount);
   };
 
-  const renderStats = (solved, failed) => {
+  const renderStats = (solved, failed, giveup) => {
     statsContainer.innerHTML = '<strong>成績:</strong><br/>';
-    let allKeys = new Set([...Object.keys(solved), ...Object.keys(failed)]);
+    let allKeys = new Set([...(solved?Object.keys(solved):[]), ...(failed?Object.keys(failed):[]), ...(giveup?Object.keys(giveup):[])]);
     const sortedKeys = Array.from(allKeys).map(Number).sort((a,b) => a - b);
     
     if (sortedKeys.length === 0) {
@@ -76,11 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     sortedKeys.forEach(d => {
-      const s = solved[d] || 0;
-      const f = failed[d] || 0;
+      const s = (solved && solved[d]) || 0;
+      const f = (failed && failed[d]) || 0;
+      const g = (giveup && giveup[d]) || 0;
       const row = document.createElement('div');
       row.className = 'stat-row';
-      row.innerHTML = `<span>${getDifficultyName(d)}:</span> <span><span class="badge-ac">${s} AC</span> / <span class="badge-fail">${f} 解説AC</span></span>`;
+      row.innerHTML = `<span>${getDifficultyName(d)}:</span> <span><span class="badge-ac">${s} AC</span> / <span class="badge-fail">${f} 解説AC</span> / <span class="badge-giveup">${g} ギブアップ</span></span>`;
       statsContainer.appendChild(row);
     });
   };
