@@ -1,4 +1,4 @@
-// summary.js
+
 document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.local.get('lastSession', (data) => {
     if (!data || !data.lastSession) {
